@@ -33,6 +33,8 @@ Start the KSQL Server:
 Start the KSQL CLI (or alternatively use the KSQL UI):  
 **bin/ksql http://localhost:8088**
 
+The following creates topics and test data manually so that you can follow each step. Instead, you can also use the ksql-datagen tool (part of KSQL project) to generate test data. You just need to provide an Avro file. Here is the file to create a continuous random test data sensor feed: https://github.com/kaiwaehner/confluent-live-demo-scripts-and-docs/blob/master/anomaly-detection-autoencoder/EcdSensorData.avro
+
 Create a Kafka Topic for this demo:  
 kafka-topics \
 --zookeeper localhost:2181 \
