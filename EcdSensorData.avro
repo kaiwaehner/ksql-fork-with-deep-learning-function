@@ -1,0 +1,29 @@
+{
+        "namespace": "ecd-sensor-data",
+        "name": "HealthSensorInputTopic",
+        "type": "record",
+        "fields": [
+        
+        
+                {"name": "eventid", "type": {
+                    "type": "long",
+                    "arg.properties": {
+                       "iteration": { "start": 1}
+                    }
+                }},
+                        
+                
+    {
+        "name": "heartbeat",
+        "type":
+          {
+            "type": "string",
+            "arg.properties": {
+              "regex": "([2-7]\\.[0-9][1-9]\\#){209}[2-7]\\.[0-9][1-9]"
+            }
+          }
+      }
+                          
+                
+    ]
+}

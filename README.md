@@ -71,8 +71,7 @@ Send a sample message (returns a prediction of 1.2104138026620321):
 Create derived stream in KSQL:
 
   CREATE STREAM AnomalyDetection WITH (VALUE_FORMAT='AVRO') AS \
-  SELECT TIMESTAMPTOSTRING(ROWTIME, 'yyyy-MM-dd HH:mm:ss') AS EVENT_TS, \
-  eventid, \
+  SELECT eventid, sensorinput, \
   CAST (anomaly(sensorinput) AS DOUBLE) as Anomaly \
   FROM healthsensor;
 
@@ -125,7 +124,8 @@ Generates all readings with same/close timestamp though. To spread out over time
 
 Run continually:
 
-  cat ecg_discord_test.msgs | pv -q -L 1000| kafkacat -b localhost:9021 -P -t HealthSensorInputTopic
+  cd test-data
+  ./stream_loop_of_test_data_into_kafka.sh
 
 ### Generating random test data
 
@@ -134,6 +134,15 @@ Run continually:
   ./bin/ksql-datagen schema=EcdSensorData.avro format=delimited topic=HealthSensorInputTopic key=eventid maxInterval=2000
 
 This uses the ksql-datagen tool (part of KSQL project) to generate test data. Whilst it provides random data, it's not very realistic to real-world data since it is truly random, rather than following a particular realistic pattern.
+
+### Change anomaly threshold
+
+  TERMINATE CSAS_ANOMALYDETECTIONBREACH;
+  DROP STREAM ANOMALYDETECTIONBREACH;
+  CREATE STREAM AnomalyDetectionBreach AS \
+  SELECT * FROM AnomalyDetectionAvro2 \
+    WHERE Anomaly >2;
+
 
 ## Stream to Elasticsearch
 
