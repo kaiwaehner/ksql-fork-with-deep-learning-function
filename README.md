@@ -120,7 +120,7 @@ Play data into Kafka:
 
 Generates all readings with same/close timestamp though. To spread out over time, use `pv` to throttle to a given bytes/sec throughput:
 
-  cat ecg_discord_test.msgs | pv -q -L 1000| kafkacat -b localhost:9021 -P -t HealthSensorInputTopic
+  cat ecg_discord_test.msgs | pv -q -L 1000| kafkacat -b localhost:9092 -P -t HealthSensorInputTopic
 
 Run continually:
 
@@ -140,8 +140,8 @@ This uses the ksql-datagen tool (part of KSQL project) to generate test data. Wh
   TERMINATE CSAS_ANOMALYDETECTIONBREACH;
   DROP STREAM ANOMALYDETECTIONBREACH;
   CREATE STREAM AnomalyDetectionBreach AS \
-  SELECT * FROM AnomalyDetectionAvro2 \
-    WHERE Anomaly >2;
+  SELECT * FROM AnomalyDetection \
+    WHERE Anomaly >4;
 
 
 ## Stream to Elasticsearch
@@ -210,6 +210,16 @@ Create a Kafka Connect sink to stream all events that breach an alert threadshol
 ## Viualisation
 
 ![](kibana_01.jpg)
+
+## Monitoring
+
+Optionally, start the Confluent Control Center :
+
+    confluent start control-center
+
+Once started, go to http://localhost:9021/monitoring/streams/ to monitor the pipelines you have built
+
+![](cc01.jpg)
 
 # Join the Confluent Community
 Whether you need help, want to contribute, or are just looking for the latest news around the Apache Kafka ecosystem and Confluent, you can find out how to [connect with your fellow Confluent community members here](https://www.confluent.io/contact-us-thank-you/).
