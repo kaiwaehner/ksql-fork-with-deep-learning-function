@@ -15,6 +15,7 @@ Run a `screen` session with Elasticsearch & Kibana:
 
 [source,bash]
 ----
+cd ~/git/ksql-fork-with-deep-learning-function
 screen -d -m -S CP_demo -t bash watch date
 screen -S CP_demo -p 0 -X screen -t Elasticsearch elasticsearch
 screen -S CP_demo -p 0 -X screen -t Kibana kibana
@@ -29,6 +30,13 @@ confluent start connect
 
 (This will also start Zookeeper, Kafka, Schema Registry, and REST proxy)
 
+Create Kafka Connect sinks to stream the three topics (source/scored/alerts) to Elasticsearch:
+
+[source,bash]
+----
+./create_es_sinks.sh
+----
+
 Create topic (cannot register KSQL stream against it otherwise):
 
 [source,bash]
@@ -41,23 +49,14 @@ kafka-topics \
 --replication-factor 1
 ----
 
-Run the custom KSQL server build and CLI:
+Run the custom KSQL server build:
 
 [source,bash]
 ----
-screen -S CP_demo -p 0 -X screen -t KSQL ./bin/ksql-server-start config/ksql-server.properties
-screen -S CP_demo -p 0 -X screen -t KSQL-CLI ./bin/ksql http://localhost:8088
-
+screen -S CP_demo -p 0 -X screen -t KSQL-server ./bin/ksql-server-start config/ksql-server.properties
 ----
 
-Connect to the screen session, make sure Elasticsearch, Kibana, and KSQL are up:
-
-[source,bash]
-----
-screen -x
-----
-
-The `KSQL` screen should say:
+Connect to the screen session (`screen -x`) — the `KSQL-server` screen should say:
 
 [source,bash]
 ----
@@ -83,6 +82,14 @@ To access the UI, point your browser at:
 http://localhost:8088/index.html
 ----
 
+Run the KSQL CLI:
+
+[source,bash]
+----
+screen -S CP_demo -p 0 -X screen -t alert-topic kafka-avro-console-consumer --bootstrap-server localhost:9092 --property schema.registry.url=http://localhost:8081 --topic ANOMALYDETECTIONBREACH --from-beginning | jq '.'
+screen -S CP_demo -p 0 -X screen -t KSQL-CLI ./bin/ksql http://localhost:8088
+----
+
 The `KSQL-CLI` screen should say:
 
 [source,bash]
@@ -105,78 +112,6 @@ CLI v5.0.0-SNAPSHOT, Server v5.0.0-SNAPSHOT located at http://localhost:8088
 Having trouble? Type 'help' (case-insensitive) for a rundown of how things work!
 
 ksql>
-----
-
-Create a Kafka Connect sink to stream all scored events to Elasticsearch:
-
-[source,bash]
-----
-curl -X "POST" "http://localhost:8083/connectors/" \
-   -H "Content-Type: application/json" \
-   -d '{
-    "name": "es_sink_raw_events",
-    "config": {
-      "topics": "SENSOR_RAW",
-      "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-      "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-      "key.ignore": "true",
-      "schema.ignore": "true",
-      "type.name": "type.name=kafkaconnect",
-      "topic.index.map": "SENSOR_RAW:healthsensorinput_raw",
-      "connection.url": "http://localhost:9200",
-      "transforms": "ExtractTimestamp",
-      "transforms.ExtractTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
-      "transforms.ExtractTimestamp.timestamp.field" : "EXTRACT_TS"
-    }
-  }'
-----
-
-
-[source,bash]
-----
-curl -X "POST" "http://localhost:8083/connectors/" \
-         -H "Content-Type: application/json" \
-         -d '{
-      "name": "es_sink_anomaly",
-      "config": {
-        "topics": "ANOMALYDETECTION",
-        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-        "key.ignore": "true",
-        "schema.ignore": "true",
-        "type.name": "type.name=kafkaconnect",
-        "topic.index.map": "ANOMALYDETECTION:healthsensorinput_scored",
-        "connection.url": "http://localhost:9200",
-        "transforms": "ExtractTimestamp",
-        "transforms.ExtractTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
-        "transforms.ExtractTimestamp.timestamp.field" : "EXTRACT_TS"
-      }
-    }'
-----
-
-Create a Kafka Connect sink to stream all events that breach an alert threshold to Elasticsearch:
-
-[source,bash]
-----
-curl -X "POST" "http://localhost:8083/connectors/" \
-         -H "Content-Type: application/json" \
-         -d '{
-      "name": "es_sink_anomaly_alerts",
-      "config": {
-        "topics": "ANOMALYDETECTIONBREACH",
-        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-        "key.ignore": "true",
-        "schema.ignore": "true",
-        "type.name": "type.name=kafkaconnect",
-        "topic.index.map": "ANOMALYDETECTIONBREACH:healthsensorinput_alerts",
-        "connection.url": "http://localhost:9200",
-        "transforms": "ExtractTimestamp",
-        "transforms.ExtractTimestamp.type": "org.apache.kafka.connect.transforms.InsertField$Value",
-        "transforms.ExtractTimestamp.timestamp.field" : "EXTRACT_TS"
-      }
-    }'
-
 ----
 
 
@@ -207,7 +142,14 @@ es_sink_anomaly_alerts   |  RUNNING  |  RUNNING
 es_sink_raw_events       |  RUNNING  |  RUNNING
 ----
 
-Check http://localhost:5601/app/kibana#/dashboard/5207cba0-6356-11e8-9701-7d60ac29aff4?_g=()[Kibana dashboard] works and has some historical data on which to fall back if demo fails. 
+Check that the source topic exists
+
+[source,bash]
+----
+kafka-topics --zookeeper localhost:2181 --list|grep HealthSensorInputTopic
+----
+
+Check http://localhost:5601/app/kibana#/dashboard/5207cba0-6356-11e8-9701-7d60ac29aff4?_g=()[Kibana dashboard] works and has some historical data on which to fall back if demo fails.
 
 ## Demo
 
@@ -216,7 +158,7 @@ In KSQL, register the source topic, and create a derived stream converting it in
 [source,sql]
 ----
 CREATE STREAM healthsensor (eventid integer, sensorinput varchar) WITH (kafka_topic='HealthSensorInputTopic', value_format='DELIMITED');
-CREATE STREAM SENSOR_RAW WITH (VALUE_FORMAT='AVRO') AS SELECT * FROM HEALTHSENSOR;
+CREATE STREAM SENSOR_RAW WITH (PARTITIONS=1,VALUE_FORMAT='AVRO') AS SELECT * FROM HEALTHSENSOR;
 ----
 
 Show that there are streams defined, columns created - and then set a continuous `SELECT` query running, using the `ANOMALY` function to apply the ML model to the input data streams:
@@ -241,7 +183,7 @@ Note that the `SELECT` output now shows the scored input. Persist this scored da
 
 [source,sql]
 ----
-CREATE STREAM AnomalyDetection WITH (VALUE_FORMAT='AVRO') AS \
+CREATE STREAM AnomalyDetection WITH (PARTITIONS=1, VALUE_FORMAT='AVRO') AS \
 SELECT eventid, sensorinput, \
 CAST (anomaly(sensorinput) AS DOUBLE) as Anomaly \
 FROM healthsensor;
@@ -263,25 +205,6 @@ echo -e  "33333, 6.90#6.89#6.86#6.82#6.78#6.73#6.64#6.57#6.50#6.41#6.31#6.22#6.1
 
 Note the newly scored output from the `SELECT` query. Now go back in time, and query all data from the source topic:
 
-[source,sql]
-----
-ksql> SET 'auto.offset.reset' = 'earliest';
-Successfully changed local property 'auto.offset.reset' from 'null' to 'earliest'
-
-ksql> SELECT EVENTID, ANOMALY FROM AnomalyDetection;
-99999 | 1.2104138026620321
-33333 | 1.4191201699929437
-----
-
-Create a derived stream that will drive alerts where the anomaly is over a given threshold:
-
-[source,sql]
-----
-CREATE STREAM AnomalyDetectionBreach AS \
-SELECT * FROM AnomalyDetection \
-WHERE Anomaly >4.3;
-----
-
 Generate some random data:
 
 [source,bash]
@@ -289,6 +212,38 @@ Generate some random data:
 ./bin/ksql-datagen schema=EcdSensorData.avro format=delimited topic=HealthSensorInputTopic key=eventid maxInterval=1000
 ----
 
-View Kibana dashboard:
+
+View Kibana dashboard to see raw data + scored data:
+
+http://localhost:5601/app/kibana#/dashboard/5207cba0-6356-11e8-9701-7d60ac29aff4?_g=()
+
+Set KSQL to query all data from beginning of topic, and use a predicate to filter out scored values above a given threshold:
+
+[source,sql]
+----
+ksql> SET 'auto.offset.reset' = 'earliest';
+Successfully changed local property 'auto.offset.reset' from 'null' to 'earliest'
+ksql> SELECT * FROM AnomalyDetection \
+WHERE Anomaly >4.3;
+----
+
+Persist a derived stream that will drive alerts where the anomaly is over a given threshold:
+
+[source,sql]
+----
+CREATE STREAM AnomalyDetectionBreach WITH (PARTITIONS=1) AS \
+SELECT * FROM AnomalyDetection \
+WHERE Anomaly >4.3;
+----
+
+[source,bash]
+----
+kafka-avro-console-consumer \
+--bootstrap-server localhost:9092 \
+--property schema.registry.url=http://localhost:8081 \
+--topic ANOMALYDETECTIONBREACH --from-beginning | jq '.'
+----
+
+View Kibana dashboard to see raw data, scored, and alerts:
 
 http://localhost:5601/app/kibana#/dashboard/5207cba0-6356-11e8-9701-7d60ac29aff4?_g=()
