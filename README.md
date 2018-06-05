@@ -13,9 +13,14 @@ Each row (i.e. message input from the sensor to Kafka) represents a single heart
 The [User-Defined KSQL Function ‘AnomalyKudf’ applies an H2O Neural Network](https://github.com/kaiwaehner/ksql/blob/4.0.x/ksql-engine/src/main/java/io/confluent/ksql/function/udf/ml/AnomalyKudf.java). The class creates a new object instance of the Deep Learning model and applies it to the incoming sensor messages for detection of anomalies in real time.
 
 
+## Slides
+
+See https://speakerdeck.com/rmoff/processing-iot-data-with-apache-kafka-ksql-and-machine-learning
+
 ## Demo script
 
 See [demo.adoc](demo.adoc)
+
 ## Quick Start for KSQL Machine Learning UDF
 How to test this implementation? The analytic model and its dependency is already included in this project. You just have to start a Kafka broker (including Zookeeper) and the KSQL server to send input streams for model inference. Here are the steps...
 
