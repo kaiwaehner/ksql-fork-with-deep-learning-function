@@ -22,3 +22,5 @@ dist/
 .settings
 .tern-port
 ui/
+logs/
+
