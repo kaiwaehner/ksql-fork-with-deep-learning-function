@@ -37,9 +37,12 @@ However, the Maven build for KSQL is already done in this project.  If you want 
 Confluent CLI needs to be set up to start a new cluster the easiest way - https://github.com/confluentinc/confluent-cli
 Alternatively, you can use an existing Kafka cluster with default broker URL (or reconfigure the ksql-server.properties file to point to your existing Kafka cluster URL).
 
-Start Kafka and Kafka Connect (plus dependencies):
+Start Kafka (also starts Zookeeper as dependency):
 
     confluent start kafka
+    
+Start Kafka Connect (not needed for KSQL, but used for integrating with Elastic for the demo):
+    
     confluent start connect
 
 Start the KSQL Server:
