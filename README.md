@@ -7,6 +7,8 @@ For the most up-to-date version, documentation and examples of KSQL, please go t
 ## Use Case: Continuous Health Checks with Anomaly Detection
 The following example leverages a pre-trained analytic model within a KSQL UDF for continuous stream processing in real time to do health checks and alerting in case of risk. The Kafka ecosystem is used for model serving, monitoring and alerting.
 
+![](pictures/cc01.jpg)
+
 ### Deep Learning with an H2O Autoencoder for Sensor Analytics
 Each row (i.e. message input from the sensor to Kafka) represents a single heartbeat and contains over 200 columns with numbers.
 
@@ -217,7 +219,7 @@ Create a Kafka Connect sink to stream all events that breach an alert threadshol
 
 ## Viualisation
 
-![](kibana_01.jpg)
+![](pictures/kibana_01.jpg)
 
 ## Monitoring
 
@@ -227,7 +229,7 @@ Optionally, start the Confluent Control Center :
 
 Once started, go to http://localhost:9021/monitoring/streams/ to monitor the pipelines you have built
 
-![](cc01.jpg)
+![](pictures/cc01.jpg)
 
 # Join the Confluent Community
 Whether you need help, want to contribute, or are just looking for the latest news around the Apache Kafka ecosystem and Confluent, you can find out how to [connect with your fellow Confluent community members here](https://www.confluent.io/contact-us-thank-you/).
