@@ -1,4 +1,4 @@
-# ![KSQL rocket](ksq-lrocket.png) Deep Learning UDF for KSQL, the Streaming SQL for Apache Kafka
+# ![KSQL rocket](pictures/ksq-lrocket.png) Deep Learning UDF for KSQL, the Streaming SQL for Apache Kafka
 
 <span style="color:red">*Important: This is a fork of the KSQL project to demonstrate how to built a User-Defined Function (UDF). The projects adds a H2O Deep Learning model.*</span>
 
@@ -7,7 +7,7 @@ For the most up-to-date version, documentation and examples of KSQL, please go t
 ## Use Case: Continuous Health Checks with Anomaly Detection
 The following example leverages a pre-trained analytic model within a KSQL UDF for continuous stream processing in real time to do health checks and alerting in case of risk. The Kafka ecosystem is used for model serving, monitoring and alerting.
 
-![](pictures/cc01.jpg)
+![](pictures/KSQL_UDF_Deep_Learning_IoT.png)
 
 ### Deep Learning with an H2O Autoencoder for Sensor Analytics
 Each row (i.e. message input from the sensor to Kafka) represents a single heartbeat and contains over 200 columns with numbers.
