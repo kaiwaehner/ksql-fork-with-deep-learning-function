@@ -4,6 +4,8 @@
 
 For the most up-to-date version, documentation and examples of KSQL, please go to [Confluent's official KSQL Github repository](https://github.com/confluentinc/ksql).
 
+<span style="color:red">*Update July 2018: KSQL now has official support for UDFs. Makes it even easier to implement. I will build an updated example soon... In the meantime, see more information about the new UDF feature in [June Preview Release - KSQL User Defined Functions(https://www.confluent.io/blog/june-preview-release-confluent-plaform/)]*</span>
+
 ## Use Case: Continuous Health Checks with Anomaly Detection
 The following example leverages a pre-trained analytic model within a KSQL UDF for continuous stream processing in real time to do health checks and alerting in case of risk. The Kafka ecosystem is used for model serving, monitoring and alerting.
 
