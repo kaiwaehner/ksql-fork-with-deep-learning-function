@@ -4,7 +4,7 @@
 
 For the most up-to-date version, documentation and examples of KSQL, please go to [Confluent's official KSQL Github repository](https://github.com/confluentinc/ksql).
 
-<span style="color:red">*Update July 2018: KSQL now has official support for UDFs. This makes it much easier to implement UDFs. I will build an updated example here: [KSQL UDF with Deep Learning using MQTT Proxy for Sensor Analytics](https://github.com/kaiwaehner/ksql-udf-deep-learning-mqtt-iot)... In the meantime, see more information about the new UDF feature in [June Preview Release - KSQL User Defined Functions(https://www.confluent.io/blog/june-preview-release-confluent-plaform/)]*</span>
+<span style="color:red">*Update July 2018: KSQL now has official support for UDFs. This makes it much easier to implement UDFs. I built an updated example here: [KSQL UDF with Deep Learning using MQTT Proxy for Sensor Analytics](https://github.com/kaiwaehner/ksql-udf-deep-learning-mqtt-iot)... Also check out the Confluent Documentation for more information about the new UDF / UDAF features in [KSQL Custom Function Reference UDF / UDAF](https://docs.confluent.io/current/ksql/docs/udf.html)*</span>
 
 ## Use Case: Continuous Health Checks with Anomaly Detection
 The following example leverages a pre-trained analytic model within a KSQL UDF for continuous stream processing in real time to do health checks and alerting in case of risk. The Kafka ecosystem is used for model serving, monitoring and alerting.
